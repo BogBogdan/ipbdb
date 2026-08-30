@@ -1,0 +1,77 @@
+{% load static %}<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Data sets - BEAMDB</title>
+    <link href="http://servo.aob.rs/emol/static/main.css" type="text/css" rel="stylesheet"/>
+    <style>
+      #setlist { max-width: 900px; margin: 18px auto 40px; }
+      #setlist .counts { color: #555; font-size: 15px; margin-bottom: 10px; }
+      #setlist .counts a { margin-right: 12px; }
+      #setlist .counts a.on { font-weight: bold; }
+      #setlist form { margin-bottom: 12px; font-size: 15px; }
+      #setlist table { width: 100%; border-collapse: collapse; font-size: 15px; }
+      #setlist th { text-align: left; font-size: 12px; text-transform: uppercase;
+                    color: #666; border-bottom: 1px solid #ddd; padding: 5px 8px; }
+      #setlist td { padding: 5px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+      #setlist td.num { text-align: right; }
+      #setlist .warn { color: #8c2020; font-size: 13px; }
+    </style>
+</head>
+<body>
+	<div id = "header">
+      <table width="100%">
+         <tr>
+            <td width="220">
+               <img src="http://servo.aob.rs/emol/static/images/lapc.jpg" title="LAPC Logo"/>
+            </td>
+            <td align="center">
+               <h2>Belgrade electron/atom(molecule) database (BEAMDB)</h2><br />
+               <h5><a href="/">Search</a> :: Data sets</h5>
+            </td>
+            <td width="220">
+               <img src="http://servo.aob.rs/emol/static/images/nanoIBCT.jpg" title="nanoIBCT Logo"/>
+            </td>
+         </tr>
+      </table>
+	</div>
+
+    <div id="setlist">
+      <div class="counts">
+        <a href="?" {% if not kind_filter %}class="on"{% endif %}>all ({{ total }})</a>
+        {% for item in summary %}
+          <a href="?kind={{ item.kind }}"
+             {% if kind_filter == item.kind %}class="on"{% endif %}>{{ item.label }} ({{ item.n }})</a>
+        {% endfor %}
+      </div>
+
+      <form method="get">
+        {% if kind_filter %}<input type="hidden" name="kind" value="{{ kind_filter }}">{% endif %}
+        <input type="text" name="target" value="{{ target_filter }}" placeholder="target">
+        <input type="submit" value="Filter">
+        {% if target_filter or kind_filter %}<a href="?">clear</a>{% endif %}
+      </form>
+
+      <table>
+        <tr>
+          <th>id</th><th>target / transition</th><th>cross section</th>
+          <th>E</th><th>angles</th><th>points</th><th>plot type</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+          <td><a href="/plots/{{ row.id }}/">{{ row.id }}</a></td>
+          <td><a href="/plots/{{ row.id }}/">{{ row.title }}</a>
+            {% if row.problems %}<div class="warn">{{ row.problems|join:"; " }}</div>{% endif %}</td>
+          <td>{{ row.cs_type }}</td>
+          <td class="num">{{ row.n_energies }}</td>
+          <td class="num">{{ row.n_angles }}</td>
+          <td class="num">{{ row.n_points }}</td>
+          <td>{{ row.kind_label }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No data sets for this filter.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+</body>
+</html>

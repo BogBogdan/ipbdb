@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+{% load static %}<!DOCTYPE HTML>
 <html>
 <head>
     <title>BEAMDB - Belgrade electron/atom(molecule) database</title>
@@ -6,10 +6,30 @@
     <link href="http://servo.aob.rs/emol/static/xmldisplay/XMLDisplay.css" type="text/css" rel="stylesheet"/>
     <script src="http://servo.aob.rs/emol/static/xmldisplay/XMLDisplay.js" type="text/javascript"></script>
     <script src="http://servo.aob.rs/emol/static/js/jquery-latest.min.js" type="text/javascript"></script>
-    <script src="http://servo.aob.rs/emol/static/js/combo-ajax.js" type="text/javascript"></script>
+    <script src="{% static 'js/beamdb-search.js' %}" type="text/javascript"></script>
     <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate"/>
     <meta http-equiv="pragma" content="no-cache"/>
     <meta http-equiv="expires" content="0"/>
+    <style>
+      #summary { margin: 18px auto 0; max-width: 900px; }
+      #summary table { width: 100%; border-collapse: collapse; font-size: 15px; }
+      #summary th { text-align: left; font-size: 12px; text-transform: uppercase;
+                    color: #666; border-bottom: 1px solid #ddd; padding: 5px 8px; }
+      #summary td { padding: 5px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+      #summary td.num { text-align: right; }
+      #summary td:last-child { white-space: nowrap; }
+      #summary td.kind { white-space: nowrap; }
+      #summary .counts { margin-bottom: 8px; color: #555; font-size: 15px; }
+      #summary .counts b { color: #000; }
+      #summary .warn { color: #8c2020; font-size: 13px; }
+      #summary .note { color: #8c2020; font-size: 13px; margin-top: 8px; }
+      #xmlbox { margin: 24px auto 0; max-width: 900px; }
+      #xmlbox h4 { margin: 0 0 8px; font-size: 15px; color: #555;
+                   border-top: 1px solid #ddd; padding-top: 14px; }
+      #wrapper { padding-bottom: 70px; }
+      #footer { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 16px;
+                padding-bottom: 20px; }
+    </style>
 </head>
 <body>
 	<div id = "header">
@@ -29,24 +49,29 @@
          </tr>
       </table>
 	</div>
-    
+
 	<div id="wrapper">
-		
+
         <div class = "styled-select">
 	<ul>{{ f.as_ul }}</ul>
 
 		<input id="generateXsams" type="submit" value="Search">
-            
-        </div>    
-            
-            <div id="results">
+
+        </div>
+
+            <div id="summary"></div>
+
+            <div id="xmlbox" style="display:none">
+              <h4>XSAMS output</h4>
+              <div id="results">
                     <div id="XMLHolder"></div>
+              </div>
             </div>
-        
+
 	</div>
-	    
+
 	<div id="footer">
-            <img width="600" src="http://servo.aob.rs/emol/static/images/partners.jpg"/>
+            <img width="380" src="http://servo.aob.rs/emol/static/images/partners.jpg"/>
 	</div>
 </body>
 </html>
