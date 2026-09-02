@@ -7,8 +7,8 @@ and `vamdctap` from `../NodeSoftware`.
 
 1. Database from the dump:
    ```powershell
-   & "C:\Program Files\MariaDB 12.3\bin\mysql.exe" -u root -proot -e "DROP DATABASE IF EXISTS ipbdb; CREATE DATABASE ipbdb CHARACTER SET utf8mb4;"
-   cmd /c '"C:\Program Files\MariaDB 12.3\bin\mysql.exe" -u root -proot ipbdb < ..\ipbdb_2026-08-16.sql'
+   & "C:\Program Files\MariaDB 12.3\bin\mysql.exe" -u root -p -e "DROP DATABASE IF EXISTS ipbdb; CREATE DATABASE ipbdb CHARACTER SET utf8mb4;"
+   cmd /c '"C:\Program Files\MariaDB 12.3\bin\mysql.exe" -u root -p ipbdb < ..\ipbdb_<date>.sql'
    ```
 
 2. `local_settings.py`, not committed. It overrides the database, the template and
@@ -34,7 +34,7 @@ and `vamdctap` from `../NodeSoftware`.
 ## Running
 
 ```powershell
-cd C:\Users\bogda\Desktop\fizika\ipbdb
+cd <checkout>\ipbdb
 ..\acol\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8001
 ```
 
