@@ -17,16 +17,7 @@
       #setlist td.num { text-align: right; }
       #setlist .warn { color: #8c2020; font-size: 13px; }
       #setlist .found { color: #555; font-size: 13px; margin-bottom: 8px; }
-      /* main.css puts a 220px left margin on every input */
-      #setlist form input { margin: 0 4px 0 0; cursor: auto; }
-      #setlist form input:hover { background: #fff; }
-      #setlist form input[type=number] { width: 55px; }
-      #setlist form input[type=submit] { cursor: pointer; }
-      #setlist form select { margin-right: 14px; }
-      /* and it floats every label left with a fixed width */
-      #setlist form label { float: none; display: inline; width: auto;
-                            text-align: left; margin: 0 14px 0 0;
-                            color: inherit; white-space: nowrap; }
+      #setlist form select { margin: 0 10px 0 0; padding: 3px; }
     </style>
 </head>
 <body>
@@ -56,20 +47,39 @@
         {% endfor %}
       </div>
 
-      <form method="get">
+      <form method="get" id="filters">
         {% if kind_filter %}<input type="hidden" name="kind" value="{{ kind_filter }}">{% endif %}
-        <input type="text" name="target" value="{{ target_filter }}" placeholder="target" size="10">
+        <select name="target">
+          <option value="">any target</option>
+          {% for name in targets %}
+            <option value="{{ name }}" {% if target_filter == name %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
         <select name="cs">
           <option value="">any cross section</option>
           {% for cs in cs_types %}
             <option value="{{ cs }}" {% if cs_filter == cs %}selected{% endif %}>{{ cs }}</option>
           {% endfor %}
         </select>
-        <label>E &ge; <input type="number" name="min_energies" value="{{ min_energies }}" min="0"></label>
-        <label>angles &ge; <input type="number" name="min_angles" value="{{ min_angles }}" min="0"></label>
-        <label>points &ge; <input type="number" name="min_points" value="{{ min_points }}" min="0"></label>
-        <input type="submit" value="Filter">
-        <a href="?">clear</a>
+        <select name="min_energies">
+          <option value="">any E</option>
+          {% for step in energy_steps %}
+            <option value="{{ step }}" {% if min_energies == step|stringformat:"s" %}selected{% endif %}>E &ge; {{ step }}</option>
+          {% endfor %}
+        </select>
+        <select name="min_angles">
+          <option value="">any angles</option>
+          {% for step in angle_steps %}
+            <option value="{{ step }}" {% if min_angles == step|stringformat:"s" %}selected{% endif %}>angles &ge; {{ step }}</option>
+          {% endfor %}
+        </select>
+        <select name="min_points">
+          <option value="">any points</option>
+          {% for step in point_steps %}
+            <option value="{{ step }}" {% if min_points == step|stringformat:"s" %}selected{% endif %}>points &ge; {{ step }}</option>
+          {% endfor %}
+        </select>
+        <a href="{% if kind_filter %}?kind={{ kind_filter }}{% else %}?{% endif %}">reset</a>
       </form>
       <div class="found">{{ rows|length }} of {{ total }} sets</div>
 
@@ -94,5 +104,10 @@
         {% endfor %}
       </table>
     </div>
+<script>
+document.querySelectorAll('#filters select').forEach(function (box) {
+    box.onchange = function () { box.form.submit(); };
+});
+</script>
 </body>
 </html>

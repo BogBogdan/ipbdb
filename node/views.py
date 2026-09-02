@@ -92,14 +92,16 @@ def plots_index(request):
     rows = []
     counts = {}
     cs_types = set()
+    targets = set()
     for tabdata in tabulated_data():
         meta = plotting.prepare(tabdata)
         counts[meta['kind']] = counts.get(meta['kind'], 0) + 1
         cs_types.add(meta['cs_type'])
         name = meta['target_formula'] or meta['target']
+        targets.add(name)
         if kind and meta['kind'] != kind:
             continue
-        if target and target.lower() not in name.lower():
+        if target and target != name:
             continue
         if cs_type and meta['cs_type'] != cs_type:
             continue
@@ -124,7 +126,11 @@ def plots_index(request):
     return render(request, 'plots_index.html', {'rows': rows,
                                                 'summary': summary,
                                                 'total': sum(counts.values()),
+                                                'targets': sorted(targets),
                                                 'cs_types': sorted(cs_types),
+                                                'energy_steps': [2, 3, 5, 10, 20],
+                                                'angle_steps': [5, 10, 20, 50, 100],
+                                                'point_steps': [50, 100, 250, 500, 1000],
                                                 'kind_filter': kind,
                                                 'target_filter': target,
                                                 'cs_filter': cs_type,
