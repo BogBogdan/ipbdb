@@ -82,7 +82,7 @@ $(document).ready(function () {
         var html = '<div class="counts">Found <b>' + data.counts.collisions +
                    '</b> collisions, <b>' + data.counts.datasets + '</b> data sets, <b>' +
                    data.counts.sources + '</b> sources.</div>';
-        html += '<table><tr><th>id</th><th>process</th><th>cross section</th>' +
+        html += '<table><tr><th>process</th><th>cross section</th>' +
                 '<th>points</th><th>plot type</th><th></th></tr>';
         data.groups.forEach(function (group) {
             group.datasets.forEach(function (dataset) {
@@ -90,7 +90,6 @@ $(document).ready(function () {
                     ? '<div class="warn">' + escapeHtml(dataset.problems.join('; ')) + '</div>'
                     : '';
                 html += '<tr>' +
-                        '<td class="num">' + dataset.id + '</td>' +
                         '<td>' + processCell(group) + '</td>' +
                         '<td>' + escapeHtml(dataset.cs_name) + ' (' + escapeHtml(dataset.cs_type) +
                         ')' + warning + '</td>' +
