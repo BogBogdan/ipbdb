@@ -6,10 +6,6 @@
     <link href="http://servo.aob.rs/emol/static/main.css" type="text/css" rel="stylesheet"/>
     <style>
       #setlist { max-width: 900px; margin: 18px auto 40px; }
-      #setlist .counts { color: #555; font-size: 15px; margin-bottom: 10px; }
-      #setlist .counts a { margin-right: 12px; }
-      #setlist .counts a.on { font-weight: bold; }
-      #setlist form { margin-bottom: 12px; font-size: 15px; }
       #setlist table { width: 100%; border-collapse: collapse; font-size: 15px; }
       #setlist th { text-align: left; font-size: 12px; text-transform: uppercase;
                     color: #666; border-bottom: 1px solid #ddd; padding: 5px 8px; }
@@ -17,7 +13,6 @@
       #setlist td.num { text-align: right; }
       #setlist .warn { color: #8c2020; font-size: 13px; }
       #setlist .found { color: #555; font-size: 13px; margin-bottom: 8px; }
-      #setlist form select { margin: 0 10px 0 0; padding: 3px; }
     </style>
 </head>
 <body>
@@ -39,48 +34,56 @@
 	</div>
 
     <div id="setlist">
-      <div class="counts">
-        <a href="?" {% if not kind_filter %}class="on"{% endif %}>all ({{ total }})</a>
-        {% for item in summary %}
-          <a href="?kind={{ item.kind }}"
-             {% if kind_filter == item.kind %}class="on"{% endif %}>{{ item.label }} ({{ item.n }})</a>
-        {% endfor %}
+      <div class = "styled-select">
+        <form method="get">
+        <ul>
+          <li><label for="id_kind">Plot type:</label>
+            <select name="kind" id="id_kind">
+              <option value="">all ({{ total }})</option>
+              {% for item in summary %}
+                <option value="{{ item.kind }}" {% if kind_filter == item.kind %}selected{% endif %}>{{ item.label }} ({{ item.n }})</option>
+              {% endfor %}
+            </select></li>
+          <li><label for="id_target">Target:</label>
+            <select name="target" id="id_target">
+              <option value="">any</option>
+              {% for name in targets %}
+                <option value="{{ name }}" {% if target_filter == name %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select></li>
+          <li><label for="id_cs">Cross Section Type:</label>
+            <select name="cs" id="id_cs">
+              <option value="">any</option>
+              {% for cs in cs_types %}
+                <option value="{{ cs }}" {% if cs_filter == cs %}selected{% endif %}>{{ cs }}</option>
+              {% endfor %}
+            </select></li>
+          <li><label for="id_min_energies">Energies at least:</label>
+            <select name="min_energies" id="id_min_energies">
+              <option value="">any</option>
+              {% for step in energy_steps %}
+                <option value="{{ step }}" {% if min_energies == step|stringformat:"s" %}selected{% endif %}>{{ step }}</option>
+              {% endfor %}
+            </select></li>
+          <li><label for="id_min_angles">Angles at least:</label>
+            <select name="min_angles" id="id_min_angles">
+              <option value="">any</option>
+              {% for step in angle_steps %}
+                <option value="{{ step }}" {% if min_angles == step|stringformat:"s" %}selected{% endif %}>{{ step }}</option>
+              {% endfor %}
+            </select></li>
+          <li><label for="id_min_points">Points at least:</label>
+            <select name="min_points" id="id_min_points">
+              <option value="">any</option>
+              {% for step in point_steps %}
+                <option value="{{ step }}" {% if min_points == step|stringformat:"s" %}selected{% endif %}>{{ step }}</option>
+              {% endfor %}
+            </select></li>
+        </ul>
+        <input type="submit" value="Search">
+        </form>
       </div>
 
-      <form method="get" id="filters">
-        {% if kind_filter %}<input type="hidden" name="kind" value="{{ kind_filter }}">{% endif %}
-        <select name="target">
-          <option value="">any target</option>
-          {% for name in targets %}
-            <option value="{{ name }}" {% if target_filter == name %}selected{% endif %}>{{ name }}</option>
-          {% endfor %}
-        </select>
-        <select name="cs">
-          <option value="">any cross section</option>
-          {% for cs in cs_types %}
-            <option value="{{ cs }}" {% if cs_filter == cs %}selected{% endif %}>{{ cs }}</option>
-          {% endfor %}
-        </select>
-        <select name="min_energies">
-          <option value="">any E</option>
-          {% for step in energy_steps %}
-            <option value="{{ step }}" {% if min_energies == step|stringformat:"s" %}selected{% endif %}>E &ge; {{ step }}</option>
-          {% endfor %}
-        </select>
-        <select name="min_angles">
-          <option value="">any angles</option>
-          {% for step in angle_steps %}
-            <option value="{{ step }}" {% if min_angles == step|stringformat:"s" %}selected{% endif %}>angles &ge; {{ step }}</option>
-          {% endfor %}
-        </select>
-        <select name="min_points">
-          <option value="">any points</option>
-          {% for step in point_steps %}
-            <option value="{{ step }}" {% if min_points == step|stringformat:"s" %}selected{% endif %}>points &ge; {{ step }}</option>
-          {% endfor %}
-        </select>
-        <a href="{% if kind_filter %}?kind={{ kind_filter }}{% else %}?{% endif %}">reset</a>
-      </form>
       <div class="found">{{ rows|length }} of {{ total }} sets</div>
 
       <table>
@@ -104,10 +107,5 @@
         {% endfor %}
       </table>
     </div>
-<script>
-document.querySelectorAll('#filters select').forEach(function (box) {
-    box.onchange = function () { box.form.submit(); };
-});
-</script>
 </body>
 </html>
