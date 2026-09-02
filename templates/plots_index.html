@@ -16,6 +16,17 @@
       #setlist td { padding: 5px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
       #setlist td.num { text-align: right; }
       #setlist .warn { color: #8c2020; font-size: 13px; }
+      #setlist .found { color: #555; font-size: 13px; margin-bottom: 8px; }
+      /* main.css puts a 220px left margin on every input */
+      #setlist form input { margin: 0 4px 0 0; cursor: auto; }
+      #setlist form input:hover { background: #fff; }
+      #setlist form input[type=number] { width: 55px; }
+      #setlist form input[type=submit] { cursor: pointer; }
+      #setlist form select { margin-right: 14px; }
+      /* and it floats every label left with a fixed width */
+      #setlist form label { float: none; display: inline; width: auto;
+                            text-align: left; margin: 0 14px 0 0;
+                            color: inherit; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -47,10 +58,20 @@
 
       <form method="get">
         {% if kind_filter %}<input type="hidden" name="kind" value="{{ kind_filter }}">{% endif %}
-        <input type="text" name="target" value="{{ target_filter }}" placeholder="target">
+        <input type="text" name="target" value="{{ target_filter }}" placeholder="target" size="10">
+        <select name="cs">
+          <option value="">any cross section</option>
+          {% for cs in cs_types %}
+            <option value="{{ cs }}" {% if cs_filter == cs %}selected{% endif %}>{{ cs }}</option>
+          {% endfor %}
+        </select>
+        <label>E &ge; <input type="number" name="min_energies" value="{{ min_energies }}" min="0"></label>
+        <label>angles &ge; <input type="number" name="min_angles" value="{{ min_angles }}" min="0"></label>
+        <label>points &ge; <input type="number" name="min_points" value="{{ min_points }}" min="0"></label>
         <input type="submit" value="Filter">
-        {% if target_filter or kind_filter %}<a href="?">clear</a>{% endif %}
+        <a href="?">clear</a>
       </form>
+      <div class="found">{{ rows|length }} of {{ total }} sets</div>
 
       <table>
         <tr>

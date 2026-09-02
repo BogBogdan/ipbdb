@@ -60,19 +60,37 @@ def tabulated_data():
             .order_by('id'))
 
 
+def below_minimum(value, wanted):
+    return wanted.isdigit() and value < int(wanted)
+
+
 def plots_index(request):
     kind = request.GET.get('kind') or ''
     target = (request.GET.get('target') or '').strip()
+    cs_type = (request.GET.get('cs') or '').strip()
+    min_energies = (request.GET.get('min_energies') or '').strip()
+    min_angles = (request.GET.get('min_angles') or '').strip()
+    min_points = (request.GET.get('min_points') or '').strip()
 
     rows = []
     counts = {}
+    cs_types = set()
     for tabdata in tabulated_data():
         meta = plotting.prepare(tabdata)
         counts[meta['kind']] = counts.get(meta['kind'], 0) + 1
+        cs_types.add(meta['cs_type'])
         name = meta['target_formula'] or meta['target']
         if kind and meta['kind'] != kind:
             continue
         if target and target.lower() not in name.lower():
+            continue
+        if cs_type and meta['cs_type'] != cs_type:
+            continue
+        if below_minimum(meta['n_energies'], min_energies):
+            continue
+        if below_minimum(meta['n_angles'], min_angles):
+            continue
+        if below_minimum(meta['n_points'], min_points):
             continue
         rows.append({'id': meta['id'],
                      'title': plotting.title(meta),
@@ -89,8 +107,13 @@ def plots_index(request):
     return render(request, 'plots_index.html', {'rows': rows,
                                                 'summary': summary,
                                                 'total': sum(counts.values()),
+                                                'cs_types': sorted(cs_types),
                                                 'kind_filter': kind,
-                                                'target_filter': target})
+                                                'target_filter': target,
+                                                'cs_filter': cs_type,
+                                                'min_energies': min_energies,
+                                                'min_angles': min_angles,
+                                                'min_points': min_points})
 
 
 def plot_detail(request, td_id):
