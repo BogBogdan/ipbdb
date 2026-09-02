@@ -85,12 +85,12 @@ $(document).ready(function () {
         html += '<table><tr><th>process</th><th>cross section</th>' +
                 '<th>points</th><th>plot type</th><th></th></tr>';
         data.groups.forEach(function (group) {
-            group.datasets.forEach(function (dataset, j) {
+            group.datasets.forEach(function (dataset) {
                 var warning = dataset.problems.length
                     ? '<div class="warn">' + escapeHtml(dataset.problems.join('; ')) + '</div>'
                     : '';
                 html += '<tr>' +
-                        '<td>' + (j === 0 ? processCell(group) : '') + '</td>' +
+                        '<td>' + processCell(group) + '</td>' +
                         '<td>' + escapeHtml(dataset.cs_name) + ' (' + escapeHtml(dataset.cs_type) +
                         ')' + warning + '</td>' +
                         '<td class="num">' + dataset.n_points + '</td>' +
