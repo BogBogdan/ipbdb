@@ -117,6 +117,25 @@ def find_problems(energy, angle, y, error):
     return fatal, warnings
 
 
+def find_extra_lists(tabdata):
+    # a set should carry one energy axis, one angle axis and one cross section
+    warnings = []
+    axes = [normalize(d.parameter) for d in tabdata.x.all()]
+    for name in ('energy', 'angle'):
+        if axes.count(name) > 1:
+            warnings.append('%d %s axes are linked, only the first one is used'
+                            % (axes.count(name), name))
+    values = [d for d in tabdata.y.all() if normalize(d.parameter) != 'error']
+    if len(values) > 1:
+        warnings.append('%d cross sections are linked, only the first one is used'
+                        % len(values))
+    strange = [d.parameter for d in tabdata.x.all()
+               if normalize(d.parameter) not in ('energy', 'angle', 'energy-loss')]
+    if strange:
+        warnings.append('%s is linked as an axis' % ', '.join(strange))
+    return warnings
+
+
 def group_by_energy(energies, angles, values, errors):
     series = {}
     for index, energy in enumerate(energies):
@@ -139,6 +158,7 @@ def group_by_energy(energies, angles, values, errors):
 def prepare(tabdata):
     energy, angle, y, error = get_axes(tabdata)
     fatal, warnings = find_problems(energy, angle, y, error)
+    warnings += find_extra_lists(tabdata)
 
     energies = split_values(energy)
     angles = split_values(angle)
