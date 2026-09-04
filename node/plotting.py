@@ -71,10 +71,17 @@ def get_axes(tabdata):
     for datalist in tabdata.accuracy.all():
         error = datalist
         break
+    if energy is None:
+        # an energy loss spectrum carries the loss instead of the beam energy
+        for datalist in tabdata.x.all():
+            if normalize(datalist.parameter) == 'energy-loss':
+                energy = datalist
+                break
     if y is None:
         # a few sets keep the cross section on the x side
         for datalist in tabdata.x.all():
-            if normalize(datalist.parameter) not in ('energy', 'angle', 'error'):
+            if normalize(datalist.parameter) not in ('energy', 'angle', 'error',
+                                                     'energy-loss'):
                 y = datalist
                 break
     return energy, angle, y, error
@@ -182,6 +189,9 @@ def prepare(tabdata):
         'sources': [source.source_id for source in tabdata.dataset.sources.all()]
                    if tabdata.dataset else [],
         'unit_energy': (energy.unit if energy else '') or 'eV',
+        'energy_label': ('energy loss'
+                         if energy and normalize(energy.parameter) == 'energy-loss'
+                         else 'E'),
         'unit_angle': (angle.unit if angle else '') or 'deg',
         'unit_y': (y.unit if y else '') or '',
         'n_points': len(values),

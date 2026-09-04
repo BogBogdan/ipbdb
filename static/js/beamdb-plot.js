@@ -112,18 +112,24 @@ window.BeamdbPlot = (function () {
                 font: {size: 14},
                 margin: {l: 0, r: 0, t: 10, b: 0},
                 scene: {xaxis: {title: 'theta<br>[' + data.unit_angle + ']', nticks: 4},
-                        yaxis: {title: 'E<br>[' + data.unit_energy + ']', nticks: 4},
+                        yaxis: {title: data.energy_label + '<br>[' + data.unit_energy + ']', nticks: 4},
                         zaxis: valueAxis(data, log),
                         camera: {eye: {x: 1.7, y: -1.6, z: 0.9}}},
                 showlegend: data.kind !== 'surface'
             };
         }
         if (data.kind === 'curve_e') {
+            var x = data.series[0].x.filter(function (v) { return v > 0; });
+            // a log axis only pays off when the energies span more than a decade
+            var wide = x.length && Math.log10(Math.max.apply(null, x)) -
+                                   Math.log10(Math.min.apply(null, x)) > 1.5;
             return {
                 font: {size: 14},
                 margin: {l: 85, r: 20, t: 20, b: 55},
-                xaxis: {title: 'E [' + data.unit_energy + ']', type: 'log',
-                        exponentformat: 'power', dtick: 1},
+                xaxis: wide
+                    ? {title: data.energy_label + '<br>[' + data.unit_energy + ']',
+                       type: 'log', exponentformat: 'power', dtick: 1}
+                    : {title: data.energy_label + ' [' + data.unit_energy + ']'},
                 yaxis: valueAxis(data, log)
             };
         }
