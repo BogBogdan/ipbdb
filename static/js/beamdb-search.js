@@ -87,12 +87,12 @@ $(document).ready(function () {
         data.groups.forEach(function (group) {
             group.datasets.forEach(function (dataset) {
                 var warning = dataset.problems.length
-                    ? '<div class="warn">' + escapeHtml(dataset.problems.join('; ')) + '</div>'
+                    ? '<div class="warn">problem: ' + escapeHtml(dataset.problems.join('; ')) + '</div>'
                     : '';
                 html += '<tr>' +
-                        '<td>' + processCell(group) + '</td>' +
+                        '<td>' + processCell(group) + warning + '</td>' +
                         '<td>' + escapeHtml(dataset.cs_name) + ' (' + escapeHtml(dataset.cs_type) +
-                        ')' + warning + '</td>' +
+                        ')</td>' +
                         '<td class="num">' + dataset.n_points + '</td>' +
                         '<td class="kind">' + escapeHtml(dataset.kind_label) + '</td>' +
                         '<td>' + linksCell(dataset) + '</td>' +
