@@ -15,10 +15,29 @@ window.BeamdbPlot = (function () {
         return data.kind === 'surface' || data.kind === 'waterfall';
     }
 
+    // how many decades the values span, so wide ranges get fewer labels
+    function decades(data) {
+        var low = Infinity, high = -Infinity;
+        var rows = data.z ? data.z : data.series.map(function (s) { return s.y; });
+        rows.forEach(function (row) {
+            row.forEach(function (value) {
+                if (value > 0) {
+                    if (value < low) low = value;
+                    if (value > high) high = value;
+                }
+            });
+        });
+        return low === Infinity ? 1 : Math.log10(high) - Math.log10(low);
+    }
+
     function valueAxis(data, log) {
-        return {title: data.cs_type + ' [' + data.unit_y + ']',
-                type: log ? 'log' : 'linear',
-                exponentformat: 'power'};
+        var axis = {title: data.cs_type + '<br>[' + data.unit_y + ']',
+                    type: log ? 'log' : 'linear',
+                    exponentformat: 'power'};
+        // labels every one, two or three decades, so they never run into the title
+        if (log) axis.dtick = Math.max(1, Math.ceil(decades(data) / 4));
+        else axis.nticks = 5;
+        return axis;
     }
 
     function hoverTemplate(data) {
@@ -92,8 +111,8 @@ window.BeamdbPlot = (function () {
             return {
                 font: {size: 14},
                 margin: {l: 0, r: 0, t: 10, b: 0},
-                scene: {xaxis: {title: 'theta [' + data.unit_angle + ']'},
-                        yaxis: {title: 'E [' + data.unit_energy + ']'},
+                scene: {xaxis: {title: 'theta<br>[' + data.unit_angle + ']', nticks: 4},
+                        yaxis: {title: 'E<br>[' + data.unit_energy + ']', nticks: 4},
                         zaxis: valueAxis(data, log),
                         camera: {eye: {x: 1.7, y: -1.6, z: 0.9}}},
                 showlegend: data.kind !== 'surface'
@@ -102,15 +121,15 @@ window.BeamdbPlot = (function () {
         if (data.kind === 'curve_e') {
             return {
                 font: {size: 14},
-                margin: {l: 70, r: 20, t: 20, b: 55},
+                margin: {l: 85, r: 20, t: 20, b: 55},
                 xaxis: {title: 'E [' + data.unit_energy + ']', type: 'log',
-                        exponentformat: 'power'},
+                        exponentformat: 'power', dtick: 1},
                 yaxis: valueAxis(data, log)
             };
         }
         return {
             font: {size: 14},
-            margin: {l: 70, r: 20, t: 20, b: 55},
+            margin: {l: 85, r: 20, t: 20, b: 55},
             xaxis: {title: 'theta [' + data.unit_angle + ']'},
             yaxis: valueAxis(data, log),
             legend: {title: {text: 'E [' + data.unit_energy + ']'}}
