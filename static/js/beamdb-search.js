@@ -73,6 +73,16 @@ $(document).ready(function () {
                '<a href="/plots/' + dataset.id + '/data.csv">CSV</a>';
     }
 
+    function sourcesCell(dataset) {
+        if (!dataset.sources.length) return '';
+        return '<div class="src">' + dataset.sources.map(function (source) {
+            return source.doi
+                ? '<a href="https://doi.org/' + source.doi + '" target="_blank">' +
+                  escapeHtml(source.id) + '</a>'
+                : escapeHtml(source.id);
+        }).join(', ') + '</div>';
+    }
+
     function renderSummary(data) {
         if (!data.groups.length) {
             $('#summary').html('<p>No data for this query.</p>');
@@ -92,7 +102,7 @@ $(document).ready(function () {
                 html += '<tr>' +
                         '<td>' + processCell(group) + warning + '</td>' +
                         '<td>' + escapeHtml(dataset.cs_name) + ' (' + escapeHtml(dataset.cs_type) +
-                        ')</td>' +
+                        ')' + sourcesCell(dataset) + '</td>' +
                         '<td class="num">' + dataset.n_points + '</td>' +
                         '<td class="kind">' + escapeHtml(dataset.kind_label) + '</td>' +
                         '<td>' + linksCell(dataset) + '</td>' +

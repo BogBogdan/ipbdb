@@ -225,8 +225,9 @@ def search_results(request):
              'kind': meta['kind'],
              'kind_label': plotting.KIND_LABELS[meta['kind']],
              'n_points': meta['n_points'],
+             'sources': meta['sources'],
              'problems': meta['problems']})
-        sources.update(meta['sources'])
+        sources.update(source['id'] for source in meta['sources'])
         total += 1
 
     query = 'select * ' + ('where ' + ' and '.join(terms) if terms else '')

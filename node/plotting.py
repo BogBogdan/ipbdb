@@ -186,8 +186,7 @@ def prepare(tabdata):
         'product': collision.product.species.name if collision else '',
         'product_formula': collision.product.species.chemical_formula if collision else '',
         'product_state': state_label(collision.product) if collision else '',
-        'sources': [source.source_id for source in tabdata.dataset.sources.all()]
-                   if tabdata.dataset else [],
+        'sources': source_list(tabdata),
         'unit_energy': (energy.unit if energy else '') or 'eV',
         'energy_label': ('energy loss'
                          if energy and normalize(energy.parameter) == 'energy-loss'
@@ -228,6 +227,15 @@ def prepare(tabdata):
     else:
         meta['kind'] = 'waterfall'
     return meta
+
+
+def source_list(tabdata):
+    if not tabdata.dataset:
+        return []
+    return [{'id': source.source_id,
+             'doi': source.digital_object_id or '',
+             'year': source.year or ''}
+            for source in tabdata.dataset.sources.all()]
 
 
 def state_label(state):

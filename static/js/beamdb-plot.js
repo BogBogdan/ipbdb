@@ -89,6 +89,7 @@ window.BeamdbPlot = (function () {
                 type: 'scatter',
                 mode: 'lines+markers',
                 name: data.cs_type,
+                line: {shape: 'spline', smoothing: 0.8},
                 x: series.x,
                 y: scale(series.y, log),
                 error_y: {type: 'data', array: series.error, visible: true}
@@ -99,6 +100,7 @@ window.BeamdbPlot = (function () {
                 type: 'scatter',
                 mode: 'lines+markers',
                 name: series.energy + ' ' + data.unit_energy,
+                line: {shape: 'spline', smoothing: 0.8},
                 x: series.angle,
                 y: scale(series.y, log),
                 error_y: {type: 'data', array: series.error, visible: true}
