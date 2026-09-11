@@ -102,6 +102,7 @@ if (!BeamdbPlot.is3d(data)) {
 }
 
 function draw() {
+    buttonLog.textContent = log ? 'linear scale' : 'log scale';
     BeamdbPlot.draw(graph, data, {mode: mode, log: log});
 }
 
