@@ -32,13 +32,8 @@ def raw_text(datalist):
     return datalist.data_values or ''
 
 
-def wrong_separator(datalist):
-    # some rows were pasted from excel
-    text = raw_text(datalist)
-    return ',' in text or ';' in text or '\t' in text
-
-
 def split_tokens(datalist):
+    # values come space, comma or tab separated, all three are accepted
     text = raw_text(datalist)
     for separator in (',', ';', '\t'):
         text = text.replace(separator, ' ')
@@ -101,9 +96,6 @@ def find_problems(energy, angle, y, error):
                 and datalist.count != len(values):
             fatal.append('count field says %s but the %s axis has %d values'
                          % (datalist.count, label, len(values)))
-        if wrong_separator(datalist):
-            warnings.append('%s axis uses commas or tabs instead of spaces, ignored'
-                            % label)
 
     n_energy = len(split_values(energy))
     n_angle = len(split_values(angle))
