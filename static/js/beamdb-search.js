@@ -133,7 +133,6 @@ $(document).ready(function () {
 
         var tap_url = base_url + '/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=' +
                       encodeURIComponent(query);
-        $('#summary').html('<p>Searching...</p>');
         $.getJSON(base_url + '/search_results/', params)
             .done(renderSummary)
             .fail(function () { $('#summary').html('<p>Search failed.</p>'); });
