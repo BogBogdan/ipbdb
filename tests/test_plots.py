@@ -11,8 +11,12 @@ KINDS = ['surface', 'waterfall', 'curve_theta', 'curve_e', 'invalid']
 
 
 def data_set_ids(site):
-    status, text = site.text('/plots/')
-    return sorted(set(int(found) for found in re.findall(r'/plots/(\d+)/', text)))
+    # the search page with no filter lists every set
+    status, result = site.json('/search_results/')
+    if not result:
+        return []
+    return sorted(dataset['id'] for group in result['groups']
+                  for dataset in group['datasets'])
 
 
 def finite(values):
@@ -84,7 +88,7 @@ def series_faults(meta):
 
 def checks(site):
     ids = data_set_ids(site)
-    yield ('the index lists data sets', bool(ids), '%d sets' % len(ids))
+    yield ('the search page lists data sets', bool(ids), '%d sets' % len(ids))
     if not ids:
         return
 

@@ -77,68 +77,6 @@ def tabulated_data():
             .order_by('id'))
 
 
-def below_minimum(value, wanted):
-    return wanted.isdigit() and value < int(wanted)
-
-
-def plots_index(request):
-    kind = request.GET.get('kind') or ''
-    target = (request.GET.get('target') or '').strip()
-    cs_type = (request.GET.get('cs') or '').strip()
-    min_energies = (request.GET.get('min_energies') or '').strip()
-    min_angles = (request.GET.get('min_angles') or '').strip()
-    min_points = (request.GET.get('min_points') or '').strip()
-
-    rows = []
-    counts = {}
-    cs_types = set()
-    targets = set()
-    for tabdata in tabulated_data():
-        meta = plotting.prepare(tabdata)
-        counts[meta['kind']] = counts.get(meta['kind'], 0) + 1
-        cs_types.add(meta['cs_type'])
-        name = meta['target_formula'] or meta['target']
-        targets.add(name)
-        if kind and meta['kind'] != kind:
-            continue
-        if target and target != name:
-            continue
-        if cs_type and meta['cs_type'] != cs_type:
-            continue
-        if below_minimum(meta['n_energies'], min_energies):
-            continue
-        if below_minimum(meta['n_angles'], min_angles):
-            continue
-        if below_minimum(meta['n_points'], min_points):
-            continue
-        rows.append({'id': meta['id'],
-                     'title': plotting.title(meta),
-                     'cs_type': meta['cs_type'],
-                     'kind': meta['kind'],
-                     'kind_label': plotting.KIND_LABELS[meta['kind']],
-                     'n_energies': meta['n_energies'],
-                     'n_angles': meta['n_angles'],
-                     'n_points': meta['n_points'],
-                     'problems': meta['problems']})
-
-    summary = [{'kind': key, 'label': plotting.KIND_LABELS[key], 'n': counts[key]}
-               for key in sorted(counts, key=lambda key: -counts[key])]
-    return render(request, 'plots_index.html', {'rows': rows,
-                                                'summary': summary,
-                                                'total': sum(counts.values()),
-                                                'targets': sorted(targets),
-                                                'cs_types': sorted(cs_types),
-                                                'energy_steps': [2, 3, 5, 10, 20],
-                                                'angle_steps': [5, 10, 20, 50, 100],
-                                                'point_steps': [50, 100, 250, 500, 1000],
-                                                'kind_filter': kind,
-                                                'target_filter': target,
-                                                'cs_filter': cs_type,
-                                                'min_energies': min_energies,
-                                                'min_angles': min_angles,
-                                                'min_points': min_points})
-
-
 def plot_detail(request, td_id):
     tabdata = get_object_or_404(tabulated_data(), pk=td_id)
     meta = plotting.prepare(tabdata)

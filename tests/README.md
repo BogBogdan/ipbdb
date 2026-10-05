@@ -17,14 +17,16 @@ The search page answers, still carries the four dropdowns, and loads our
 `beamdb-search.js` and not the production `combo-ajax.js`, which has
 `servo.aob.rs` hard coded and would send a local page to query production.
 
-The data set index answers and carries its six filters. Plotly and both of our
-scripts are served from this node, so the pages do not depend on a cdn. The two
+`/plots/` must be gone, a graph is reached from the results table and not from a
+listing of its own. Plotly and both of our scripts are served from this node, so
+the pages do not depend on a cdn. The two
 TAP service documents answer and parse, and `availability` says the node is up.
 An unknown data set gives 404 rather than a server error.
 
 ## test_plots
 
-Walks every data set the index lists and asks for all three of its addresses.
+Walks every data set the search page lists, with no filter set, and asks for all
+three of its addresses.
 
 The page renders and has a non empty title. `data.json` answers and reports a plot
 type we know. The numbers behind the graph are then checked against themselves:
@@ -40,9 +42,8 @@ prints each flagged set so a change in the data is visible in the output.
 
 ## test_search
 
-The summary table under the search form must hold exactly the sets the index lists,
-with matching counts, and every row must name its process, its cross section and its
-sources. The collision type filter must narrow the table and return only that type,
+The summary table under the search form must report counts that match its own rows,
+and every row must name its process, its cross section and its sources. The collision type filter must narrow the table and return only that type,
 an unknown filter must return nothing.
 
 The note about the XSAMS output must stay away when the filters can be passed on to

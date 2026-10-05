@@ -19,10 +19,9 @@ def checks(site):
            'beamdb-search.js' in text and 'combo-ajax.js' not in text,
            'combo-ajax.js is the production one and queries servo.aob.rs')
 
-    status, text = site.text('/plots/')
-    yield ('data set index answers', status == 200, 'http %s' % status)
-    yield ('index has the filter form', text.count('<select') == 6,
-           '%d selects, expected 6' % text.count('<select'))
+    status, body = site.fetch('/plots/')
+    yield ('there is no separate data set listing', status == 404,
+           'http %s, plots are reached from the search page' % status)
 
     missing = []
     for path in STATIC:

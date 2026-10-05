@@ -42,10 +42,9 @@ Port 8001 so that ACol can stay on 8000.
 
 - Site:      http://127.0.0.1:8001/
 - Admin:     http://127.0.0.1:8001/admin/
-- Data sets: http://127.0.0.1:8001/plots/
 - TAP:       http://127.0.0.1:8001/tap/capabilities
 
-The database holds 100 collisions, 217 tabulated data sets, 733 datalists and
+The database holds 100 collisions, 218 tabulated data sets, 737 datalists and
 45 species.
 
 ## Plots
@@ -61,12 +60,12 @@ entered by hand:
 | `curve_e` | no angle axis | 2D curve sigma(E) |
 | `invalid` | axis lengths do not match | nothing, the problems are listed |
 
-Current counts: 72 waterfall, 67 surface, 60 curve_e, 10 invalid, 8 curve_theta.
+Current counts: 77 waterfall, 71 surface, 59 curve_e, 8 curve_theta, 3 invalid.
 
 Pages:
 
-- `/plots/` list of all sets, filter by plot type and by target
-- `/plots/<id>/` one plot, with 3D, 2D and log scale buttons
+- `/plots/<id>/` one plot, with 3D, 2D and log scale buttons, reached from
+  the results table on the search page
 - `/plots/<id>/data.json` and `/plots/<id>/data.csv` the same set as data
 
 Plotly is served from `static/js/plotly.min.js`, version 2.35.3, so the node does

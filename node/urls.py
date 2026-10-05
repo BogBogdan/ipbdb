@@ -18,7 +18,6 @@ from node import views
 
 urlpatterns = [
         url(r'^search_results/$', views.search_results),
-        url(r'^plots/$', views.plots_index),
         url(r'^plots/(?P<td_id>\d+)/$', views.plot_detail),
         url(r'^plots/(?P<td_id>\d+)/data\.json$', views.plot_json),
         url(r'^plots/(?P<td_id>\d+)/data\.csv$', views.plot_csv),

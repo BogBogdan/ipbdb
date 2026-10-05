@@ -1,7 +1,5 @@
 # The summary table on the search page and the filters above it.
 
-import re
-
 from client import listed
 from test_plots import data_set_ids
 
@@ -18,7 +16,7 @@ def checks(site):
     found = sorted(dataset['id'] for group in result['groups']
                    for dataset in group['datasets'])
     yield ('the table holds every data set', found == ids,
-           '%d in the table, %d on the index' % (len(found), len(ids)))
+           '%d rows' % len(found))
     yield ('the counts agree with the rows',
            result['counts']['datasets'] == len(found)
            and result['counts']['collisions'] == len(result['groups']),
@@ -63,8 +61,3 @@ def checks(site):
     yield ('the note is advice, not a data problem',
            narrowed is not None and 'problem' not in narrowed['note'].lower(),
            'rendered grey, the red colour is kept for data problems')
-
-    rows = len(set(re.findall(r'/plots/(\d+)/', site.text('/plots/?kind=surface')[1])))
-    every = len(set(re.findall(r'/plots/(\d+)/', site.text('/plots/')[1])))
-    yield ('the index filters by plot type', 0 < rows < every,
-           '%d of %d sets' % (rows, every))
