@@ -236,8 +236,9 @@ def search_results(request):
     # vss2 has no keyword for cross section type or for a single state
     note = ''
     if cs_id.isdigit() or state_id.isdigit():
-        note = ('The XSAMS document is wider than this table because the query '
-                'language cannot filter on cross section type or on a single state.')
+        note = ('The XSAMS output below also holds the other cross section types '
+                'and states of these collisions, the TAP query language cannot '
+                'narrow it down to the selection above.')
 
     result = {'query': query,
               'note': note,
