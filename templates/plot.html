@@ -61,7 +61,7 @@
       <div class="buttons">
         <button id="button3d">3D</button>
         <button id="button2d">2D</button>
-        <button id="buttonLog">log scale</button>
+        <button id="buttonLog">switch to linear</button>
         <a href="/plots/{{ meta.id }}/data.csv">CSV</a>
         <a href="/plots/{{ meta.id }}/data.json">JSON</a>
       </div>
@@ -102,7 +102,7 @@ if (!BeamdbPlot.is3d(data)) {
 }
 
 function draw() {
-    buttonLog.textContent = log ? 'linear scale' : 'log scale';
+    buttonLog.textContent = log ? 'switch to linear' : 'switch to log';
     BeamdbPlot.draw(graph, data, {mode: mode, log: log});
 }
 
