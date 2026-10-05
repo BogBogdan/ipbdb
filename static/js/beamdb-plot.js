@@ -30,13 +30,26 @@ window.BeamdbPlot = (function () {
         return low === Infinity ? 1 : Math.log10(high) - Math.log10(low);
     }
 
-    function valueAxis(data, log) {
-        var axis = {title: data.cs_type + '<br>[' + data.unit_y + ']',
+    function valueAxis(data, log, oneLine) {
+        // a scene draws the second line of a title over the numbers, so 3d gets one line
+        var axis = {title: data.cs_type + (oneLine ? ' [' : '<br>[') + data.unit_y + ']',
                     type: log ? 'log' : 'linear',
                     exponentformat: 'power'};
         // labels every one, two or three decades, so they never run into the title
         if (log) axis.dtick = Math.max(1, Math.ceil(decades(data) / 4));
         else axis.nticks = 5;
+        return axis;
+    }
+
+    // the three axes of a scene share their look
+    function sceneAxis(axis, nticks) {
+        axis.titlefont = {size: 13};
+        axis.tickfont = {size: 11};
+        axis.gridcolor = '#dddddd';
+        axis.zerolinecolor = '#cccccc';
+        axis.backgroundcolor = '#fbfbfb';
+        axis.showbackground = true;
+        if (nticks) axis.nticks = nticks;
         return axis;
     }
 
@@ -59,8 +72,10 @@ window.BeamdbPlot = (function () {
                 });
             }) : z,
             colorscale: 'Viridis',
-            colorbar: {title: log ? 'log10 ' + data.unit_y : data.unit_y,
-                       titleside: 'right', exponentformat: 'power'},
+            colorbar: {title: {text: log ? 'log10 ' + data.unit_y : data.unit_y,
+                               side: 'right', font: {size: 12}},
+                       tickfont: {size: 11}, thickness: 14, len: 0.7,
+                       exponentformat: 'power'},
             hovertemplate: hoverTemplate(data),
             contours: {z: {show: true, usecolormap: true, project: {z: true}}}
         }];
@@ -71,7 +86,7 @@ window.BeamdbPlot = (function () {
             return {
                 type: 'scatter3d',
                 mode: 'lines+markers',
-                name: series.energy + ' ' + data.unit_energy,
+                name: String(series.energy),
                 x: series.angle,
                 y: series.angle.map(function () { return series.energy; }),
                 z: scale(series.y, log),
@@ -99,7 +114,7 @@ window.BeamdbPlot = (function () {
             return {
                 type: 'scatter',
                 mode: 'lines+markers',
-                name: series.energy + ' ' + data.unit_energy,
+                name: String(series.energy),
                 line: {shape: 'spline', smoothing: 0.8},
                 x: series.angle,
                 y: scale(series.y, log),
@@ -111,13 +126,23 @@ window.BeamdbPlot = (function () {
     function layout(data, mode, log) {
         if (mode === '3d') {
             return {
-                font: {size: 14},
-                margin: {l: 0, r: 0, t: 10, b: 0},
-                scene: {xaxis: {title: 'theta<br>[' + data.unit_angle + ']', nticks: 4},
-                        yaxis: {title: data.energy_label + '<br>[' + data.unit_energy + ']', nticks: 4},
-                        zaxis: valueAxis(data, log),
-                        camera: {eye: {x: 1.7, y: -1.6, z: 0.9}}},
-                showlegend: data.kind !== 'surface'
+                font: {size: 13},
+                margin: {l: 0, r: 0, t: 0, b: 0},
+                scene: {
+                    xaxis: sceneAxis({title: 'theta [' + data.unit_angle + ']'}, 5),
+                    yaxis: sceneAxis({title: data.energy_label + ' [' +
+                                             data.unit_energy + ']'}, 5),
+                    zaxis: sceneAxis(valueAxis(data, log, true)),
+                    aspectmode: 'manual',
+                    aspectratio: {x: 1.15, y: 1.15, z: 0.9},
+                    // far enough back that the titles clear the numbers
+                    camera: {eye: {x: 1.8, y: -1.7, z: 0.75},
+                             center: {x: 0, y: 0, z: -0.12}}
+                },
+                showlegend: data.kind !== 'surface',
+                legend: {font: {size: 11}, itemsizing: 'constant',
+                         title: {text: data.energy_label + ' [' +
+                                       data.unit_energy + ']', font: {size: 11}}}
             };
         }
         if (data.kind === 'curve_e') {
@@ -127,9 +152,9 @@ window.BeamdbPlot = (function () {
                                    Math.log10(Math.min.apply(null, x)) > 1.5;
             return {
                 font: {size: 14},
-                margin: {l: 85, r: 20, t: 20, b: 55},
+                margin: {l: 95, r: 20, t: 20, b: 55},
                 xaxis: wide
-                    ? {title: data.energy_label + '<br>[' + data.unit_energy + ']',
+                    ? {title: data.energy_label + ' [' + data.unit_energy + ']',
                        type: 'log', exponentformat: 'power', dtick: 1}
                     : {title: data.energy_label + ' [' + data.unit_energy + ']'},
                 yaxis: valueAxis(data, log)
@@ -137,7 +162,7 @@ window.BeamdbPlot = (function () {
         }
         return {
             font: {size: 14},
-            margin: {l: 85, r: 20, t: 20, b: 55},
+            margin: {l: 95, r: 20, t: 20, b: 55},
             xaxis: {title: 'theta [' + data.unit_angle + ']'},
             yaxis: valueAxis(data, log),
             legend: {title: {text: 'E [' + data.unit_energy + ']'}}
