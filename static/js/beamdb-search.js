@@ -1,8 +1,8 @@
-// Local combo-ajax.js, requests go to this node
+// Local combo-ajax.js. The original points every request at servo.aob.rs,
+// these go to this node, so the paths carry no host.
 
 $(document).ready(function () {
 
-    var base_url = '';
     var colltypes = 'select[name=CollisionTypes]';
     var species = 'select[name=Species]';
     var states = 'select[name=SpeciesStates]';
@@ -20,7 +20,7 @@ $(document).ready(function () {
         $(cstypes).resetElem();
         if (!coll_type_id) return;
         $(species).removeAttr('disabled');
-        $.getJSON(base_url + '/get_species/' + coll_type_id + '/', function (data) {
+        $.getJSON('/get_species/' + coll_type_id + '/', function (data) {
             $.each(data, function (key, value) {
                 $(species).append('<option value="' + key + '">' + value + '</option>');
             });
@@ -34,7 +34,7 @@ $(document).ready(function () {
         $(cstypes).resetElem();
         if (!species_id) return;
         $(states).removeAttr('disabled');
-        $.getJSON(base_url + '/get_states/' + species_id + '/' + coll_type_id + '/', function (data) {
+        $.getJSON('/get_states/' + species_id + '/' + coll_type_id + '/', function (data) {
             $.each(data, function (key, value) {
                 $(states).append('<option value="' + key + '">' + value + '</option>');
             });
@@ -47,7 +47,7 @@ $(document).ready(function () {
         $(cstypes).resetElem();
         if (!state_id) return;
         $(cstypes).removeAttr('disabled');
-        $.getJSON(base_url + '/get_cs_types/' + state_id + '/' + coll_type_id + '/', function (data) {
+        $.getJSON('/get_cs_types/' + state_id + '/' + coll_type_id + '/', function (data) {
             $.each(data, function (key, value) {
                 $(cstypes).append('<option value="' + key + '">' + value + '</option>');
             });
@@ -131,9 +131,9 @@ $(document).ready(function () {
         if ($(states).val()) params.state = $(states).val();
         if ($(cstypes).val()) params.cs_type = $(cstypes).val();
 
-        var tap_url = base_url + '/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=' +
+        var tap_url = '/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=' +
                       encodeURIComponent(query);
-        $.getJSON(base_url + '/search_results/', params)
+        $.getJSON('/search_results/', params)
             .done(renderSummary)
             .fail(function () { $('#summary').html('<p>Search failed.</p>'); });
 
