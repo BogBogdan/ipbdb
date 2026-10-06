@@ -123,6 +123,15 @@ window.BeamdbPlot = (function () {
         });
     }
 
+    function flatLayout(data, log, xaxis, legendTitle) {
+        var out = {font: {size: 14},
+                   margin: {l: 95, r: 20, t: 20, b: 55},
+                   xaxis: xaxis,
+                   yaxis: valueAxis(data, log)};
+        if (legendTitle) out.legend = {title: {text: legendTitle}};
+        return out;
+    }
+
     function layout(data, mode, log) {
         if (mode === '3d') {
             return {
@@ -150,23 +159,16 @@ window.BeamdbPlot = (function () {
             // a log axis only pays off when the energies span more than a decade
             var wide = x.length && Math.log10(Math.max.apply(null, x)) -
                                    Math.log10(Math.min.apply(null, x)) > 1.5;
-            return {
-                font: {size: 14},
-                margin: {l: 95, r: 20, t: 20, b: 55},
-                xaxis: wide
-                    ? {title: data.energy_label + ' [' + data.unit_energy + ']',
-                       type: 'log', exponentformat: 'power', dtick: 1}
-                    : {title: data.energy_label + ' [' + data.unit_energy + ']'},
-                yaxis: valueAxis(data, log)
-            };
+            var xaxis = {title: data.energy_label + ' [' + data.unit_energy + ']'};
+            if (wide) {
+                xaxis.type = 'log';
+                xaxis.exponentformat = 'power';
+                xaxis.dtick = 1;
+            }
+            return flatLayout(data, log, xaxis);
         }
-        return {
-            font: {size: 14},
-            margin: {l: 95, r: 20, t: 20, b: 55},
-            xaxis: {title: 'theta [' + data.unit_angle + ']'},
-            yaxis: valueAxis(data, log),
-            legend: {title: {text: 'E [' + data.unit_energy + ']'}}
-        };
+        return flatLayout(data, log, {title: 'theta [' + data.unit_angle + ']'},
+                          'E [' + data.unit_energy + ']');
     }
 
     function traces(data, mode, log) {

@@ -59,7 +59,6 @@ def get_cs_types(request, state_id, coll_type_id):
 
 # --- plots, added on top of the original views ---
 import csv
-from urllib.parse import quote
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -77,9 +76,12 @@ def tabulated_data():
             .order_by('id'))
 
 
+def one_set(td_id):
+    return plotting.prepare(get_object_or_404(tabulated_data(), pk=td_id))
+
+
 def plot_detail(request, td_id):
-    tabdata = get_object_or_404(tabulated_data(), pk=td_id)
-    meta = plotting.prepare(tabdata)
+    meta = one_set(td_id)
     return render(request, 'plot.html',
                   {'meta': meta,
                    'meta_json': json.dumps(meta),
@@ -88,16 +90,14 @@ def plot_detail(request, td_id):
 
 
 def plot_json(request, td_id):
-    tabdata = get_object_or_404(tabulated_data(), pk=td_id)
-    meta = plotting.prepare(tabdata)
+    meta = one_set(td_id)
     meta['title'] = plotting.title(meta)
     meta['kind_label'] = plotting.KIND_LABELS[meta['kind']]
     return JsonResponse(meta)
 
 
 def plot_csv(request, td_id):
-    tabdata = get_object_or_404(tabulated_data(), pk=td_id)
-    meta = plotting.prepare(tabdata)
+    meta = one_set(td_id)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=ipbdb-%s.csv' % td_id
     writer = csv.writer(response)
@@ -125,13 +125,10 @@ def search_results(request):
     cs_id = (request.GET.get('cs_type') or '').strip()
 
     collisions = Collision.objects.all()
-    terms = []
     if coll_code:
         collisions = collisions.filter(collision_type__iaea_code=coll_code)
-        terms.append("CollisionIAEACode='%s'" % coll_code)
     if inchikey:
         collisions = collisions.filter(product__species__inchikey=inchikey)
-        terms.append("InchiKey='%s'" % inchikey)
     if state_id.isdigit():
         collisions = collisions.filter(product_id=int(state_id))
 
@@ -140,7 +137,6 @@ def search_results(request):
         sets = sets.filter(cross_section_type_id=int(cs_id))
 
     groups = {}
-    order = []
     sources = set()
     total = 0
     for tabdata in sets:
@@ -155,7 +151,6 @@ def search_results(request):
                                     'product_formula': meta['product_formula'],
                                     'product_state': meta['product_state'],
                                     'datasets': []}
-            order.append(collision.id)
         groups[collision.id]['datasets'].append(
             {'id': meta['id'],
              'cs_type': meta['cs_type'],
@@ -168,9 +163,6 @@ def search_results(request):
         sources.update(source['id'] for source in meta['sources'])
         total += 1
 
-    query = 'select * ' + ('where ' + ' and '.join(terms) if terms else '')
-    tap_url = '/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=' + quote(query)
-
     # vss2 has no keyword for cross section type or for a single state
     note = ''
     if cs_id.isdigit() or state_id.isdigit():
@@ -178,11 +170,9 @@ def search_results(request):
                 'and states of these collisions, the TAP query language cannot '
                 'narrow it down to the selection above.')
 
-    result = {'query': query,
-              'note': note,
-              'tap_url': tap_url,
-              'counts': {'collisions': len(order),
+    result = {'note': note,
+              'counts': {'collisions': len(groups),
                          'datasets': total,
                          'sources': len(sources)},
-              'groups': [groups[key] for key in order]}
+              'groups': list(groups.values())}
     return JsonResponse(result)
