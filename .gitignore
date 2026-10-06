@@ -29,3 +29,6 @@ django.wsgi
 node/models_old.py
 
 tmp/
+
+RUN_LOCAL.md
+tests/
