@@ -8,6 +8,13 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from node.models import *
 from node.forms import Search_form
+
+import csv
+
+from django.http import JsonResponse
+from django.shortcuts import render
+
+from node import plotting
 """
 def index(request):
     import dictionaries
@@ -58,12 +65,6 @@ def get_cs_types(request, state_id, coll_type_id):
     return HttpResponse(json.dumps(cs_dict))
 
 # --- plots, added on top of the original views ---
-import csv
-
-from django.http import JsonResponse
-from django.shortcuts import render
-
-from node import plotting
 
 
 def tabulated_data():
