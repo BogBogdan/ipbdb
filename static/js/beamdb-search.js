@@ -1,8 +1,10 @@
-// Local combo-ajax.js. The original points every request at servo.aob.rs,
-// these go to this node, so the paths carry no host.
+// Local combo-ajax.js. The original has servo.aob.rs written into it, which
+// pins it to one deployment. This one asks whichever node served the page.
 
 $(document).ready(function () {
 
+    // this page is the node root, so every address hangs off its own path
+    var base = window.location.pathname.replace(/\/?$/, '/');
     var colltypes = 'select[name=CollisionTypes]';
     var species = 'select[name=Species]';
     var states = 'select[name=SpeciesStates]';
@@ -20,7 +22,7 @@ $(document).ready(function () {
         $(cstypes).resetElem();
         if (!coll_type_id) return;
         $(species).removeAttr('disabled');
-        $.getJSON('/get_species/' + coll_type_id + '/', function (data) {
+        $.getJSON(base + 'get_species/' + coll_type_id + '/', function (data) {
             $.each(data, function (key, value) {
                 $(species).append('<option value="' + key + '">' + value + '</option>');
             });
@@ -34,7 +36,7 @@ $(document).ready(function () {
         $(cstypes).resetElem();
         if (!species_id) return;
         $(states).removeAttr('disabled');
-        $.getJSON('/get_states/' + species_id + '/' + coll_type_id + '/', function (data) {
+        $.getJSON(base + 'get_states/' + species_id + '/' + coll_type_id + '/', function (data) {
             $.each(data, function (key, value) {
                 $(states).append('<option value="' + key + '">' + value + '</option>');
             });
@@ -47,7 +49,7 @@ $(document).ready(function () {
         $(cstypes).resetElem();
         if (!state_id) return;
         $(cstypes).removeAttr('disabled');
-        $.getJSON('/get_cs_types/' + state_id + '/' + coll_type_id + '/', function (data) {
+        $.getJSON(base + 'get_cs_types/' + state_id + '/' + coll_type_id + '/', function (data) {
             $.each(data, function (key, value) {
                 $(cstypes).append('<option value="' + key + '">' + value + '</option>');
             });
@@ -69,8 +71,8 @@ $(document).ready(function () {
         if (dataset.kind === 'invalid') {
             return '<small>no plot</small>';
         }
-        return '<a href="/plots/' + dataset.id + '/">plot</a> &middot; ' +
-               '<a href="/plots/' + dataset.id + '/data.csv">CSV</a>';
+        return '<a href="' + base + 'plots/' + dataset.id + '/">plot</a> &middot; ' +
+               '<a href="' + base + 'plots/' + dataset.id + '/data.csv">CSV</a>';
     }
 
     function sourcesCell(dataset) {
@@ -131,9 +133,9 @@ $(document).ready(function () {
         if ($(states).val()) params.state = $(states).val();
         if ($(cstypes).val()) params.cs_type = $(cstypes).val();
 
-        var tap_url = '/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=' +
+        var tap_url = base + 'tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=' +
                       encodeURIComponent(query);
-        $.getJSON('/search_results/', params)
+        $.getJSON(base + 'search_results/', params)
             .done(renderSummary)
             .fail(function () { $('#summary').html('<p>Search failed.</p>'); });
 
