@@ -27,3 +27,5 @@ venv/
 *.pem
 django.wsgi
 node/models_old.py
+
+tmp/
