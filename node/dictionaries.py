@@ -136,6 +136,10 @@ RESTRICTABLES = {\
 'Inchi' : 'product__species__inchi',
 'ParticleName' : test_constant(['electron']),
 
+#the state the target is left in, the term alone is not unique
+'AtomStateTermLabel' : 'product__term',
+'AtomStateDescription' : 'product__description',
+
 #only search for reactants
 'reactant0.AtomSymbol' : 'reactant__species__chemical_formula',
 'reactant0.MoleculeChemicalName' : 'reactant__species__name',
