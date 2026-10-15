@@ -10,6 +10,7 @@ from node.models import *
 from node.forms import Search_form
 
 import csv
+import re
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -97,10 +98,16 @@ def plot_json(request, td_id):
     return JsonResponse(meta)
 
 
+def file_name(meta):
+    # the description names the set, a file name cannot carry every character
+    name = re.sub(r'[^A-Za-z0-9]+', '-', meta['description']).strip('-')
+    return 'ipbdb-%s-%s.csv' % (meta['id'], name) if name else 'ipbdb-%s.csv' % meta['id']
+
+
 def plot_csv(request, td_id):
     meta = one_set(td_id)
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=ipbdb-%s.csv' % td_id
+    response['Content-Disposition'] = 'attachment; filename=%s' % file_name(meta)
     writer = csv.writer(response)
     if meta['kind'] == 'curve_e':
         writer.writerow(['energy_%s' % meta['unit_energy'],
