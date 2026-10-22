@@ -21,6 +21,7 @@ urlpatterns = [
         url(r'^plots/(?P<td_id>\d+)/$', views.plot_detail),
         url(r'^plots/(?P<td_id>\d+)/data\.json$', views.plot_json),
         url(r'^plots/(?P<td_id>\d+)/data\.csv$', views.plot_csv),
+        url(r'^plots/(?P<td_id>\d+)/data\.xsams$', views.plot_xsams),
         url(r'^$', views.index),
         url(r'^get_species/(?P<coll_type_id>\w+)/$', views.get_species),
 	    url(r'^get_states/(?P<species_id>[\w-]+)/(?P<coll_type_id>\w+)/$', views.get_states),
