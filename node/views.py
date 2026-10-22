@@ -10,11 +10,15 @@ from node.models import *
 from node.forms import Search_form
 
 import csv
+import datetime
 
 from django.http import JsonResponse
 from django.shortcuts import render
 
+from vamdctap.generators import Xsams
+
 from node import plotting
+from node import queryfunc
 """
 def index(request):
     import dictionaries
@@ -97,16 +101,17 @@ def plot_json(request, td_id):
     return JsonResponse(meta)
 
 
-def file_name(meta):
+def file_name(meta, suffix):
     # the description names the set, a file name cannot carry every character
     name = '-'.join(''.join(c if c.isalnum() else ' ' for c in meta['description']).split())
-    return 'ipbdb-%s-%s.csv' % (meta['id'], name) if name else 'ipbdb-%s.csv' % meta['id']
+    stem = 'ipbdb-%s-%s' % (meta['id'], name) if name else 'ipbdb-%s' % meta['id']
+    return '%s.%s' % (stem, suffix)
 
 
 def plot_csv(request, td_id):
     meta = one_set(td_id)
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s' % file_name(meta)
+    response['Content-Disposition'] = 'attachment; filename=%s' % file_name(meta, 'csv')
     writer = csv.writer(response)
     if meta['kind'] == 'curve_e':
         writer.writerow(['energy_%s' % meta['unit_energy'],
@@ -122,6 +127,82 @@ def plot_csv(request, td_id):
             for i in range(len(series['angle'])):
                 writer.writerow([series['energy'], series['angle'][i],
                                  series['y'][i], series['error'][i]])
+    return response
+
+
+class OneSetQuery:
+    # the generator reads these off the tap query, and one set is not a query
+    requestables = []
+    token = ''
+
+    def __init__(self, request, meta):
+        self.fullurl = request.build_absolute_uri()
+        self.query = 'tabulated data %s, %s' % (meta['id'], meta['description'])
+
+
+def xsams_data(tabdata):
+    # what queryfunc hands the generator for a search, holding this set alone
+    collision = tabdata.dataset.collision
+    states = {state.id: state for state in (collision.reactant, collision.product)}
+    atoms = []
+    molecules = []
+    species = {state.species_id: state.species for state in states.values()}
+    for one in species.values():
+        one.States = [state for state in states.values() if state.species_id == one.id]
+        if one.species_type.name == 'Atom':
+            atoms.append(one)
+        else:
+            molecules.append(one)
+
+    sources = list(tabdata.dataset.sources.all())
+    for source in sources:
+        source.authnames = source.authors.values_list('name', flat=True)
+
+    collision.Reactants = [queryfunc.ReaProd(collision.reactant_id, collision.reactant.species_id),
+                           queryfunc.ReaProd('', 'XElectron')]
+    collision.Products = [queryfunc.ReaProd(collision.product_id, collision.product.species_id)]
+    collision.sourcerefs = [source.source_id for source in sources]
+    collision.DataSets = [tabdata.dataset]
+    tabdata.dataset.TabData = [tabdata]
+
+    return {'Sources': sources,
+            'CollTrans': [collision],
+            'Atoms': atoms,
+            'Molecules': molecules,
+            'Particles': [queryfunc.Particle('electron')],
+            'HeaderInfo': {'COUNT-SOURCES': len(sources),
+                           'COUNT-SPECIES': len(species),
+                           'COUNT-ATOMS': len(atoms),
+                           'COUNT-MOLECULES': len(molecules),
+                           'COUNT-STATES': len(states),
+                           'COUNT-COLLISIONS': 1,
+                           'COUNT-RADIATIVE': 0,
+                           'LAST-MODIFIED': min(collision.lastmodified,
+                                                datetime.datetime.now())}}
+
+
+def indented(document):
+    # the generator writes a whole section on one line, which no editor can fold
+    lines = []
+    depth = 0
+    for line in document.replace('><', '>\n<').split('\n'):
+        opens = (line.startswith('<') and not line.startswith('</')
+                 and not line.startswith('<?') and not line.endswith('/>')
+                 and '</' not in line)
+        if line.startswith('</'):
+            depth -= 1
+        lines.append('  ' * max(depth, 0) + line)
+        if opens:
+            depth += 1
+    return '\n'.join(lines)
+
+
+def plot_xsams(request, td_id):
+    tabdata = get_object_or_404(tabulated_data(), pk=td_id)
+    meta = plotting.prepare(tabdata)
+    document = ''.join(Xsams(tap=OneSetQuery(request, meta), **xsams_data(tabdata)))
+    response = HttpResponse(indented(document), content_type='text/xml')
+    response['Content-Disposition'] = 'attachment; filename=%s' % file_name(meta, 'xsams')
     return response
 
 
